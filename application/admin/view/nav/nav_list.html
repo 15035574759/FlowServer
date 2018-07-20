@@ -1,0 +1,133 @@
+{include file="public/header" /}
+<style>
+    .layui-form-switch {
+        padding-left: 0px;
+        transition: .1s linear;
+    }
+
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>导航列表</h2>
+    </blockquote>
+
+    <div class="y-role">
+        <!--工具栏-->
+        <div id="floatHead" class="toolbar-wrap">
+            <div class="toolbar">
+                <div class="box-wrap">
+                    <a class="menu-btn"></a>
+                    <div class="l-list">
+                        <a class="layui-btn layui-btn-small do-action" data-type="doAdd" data-href="{:url('nav_add')}"><i class="fa fa-plus"></i>新增</a>
+
+                        <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href=""><i class="fa fa-refresh fa-spin"></i>刷新</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/工具栏-->
+        <!--文字列表-->
+        <div class="fhui-admin-table-container">
+            <form action="/_Admin/Nav_list" class="form-horizontal" id="formrec" method="post" role="form">
+                <table class="layui-table" lay-skin="line">
+                    <!-- <colgroup>
+
+                        <col width="5%">
+                        <col width="15%">
+                        <col width="8%">
+                        <col width="5%">
+
+                        <col width="15%">
+                    </colgroup> -->
+                    <thead>
+                    <tr>
+
+                        <th>ID</th>
+                        <th>导航名称</th>
+                        <th>导航url</th>
+                        <th>是否启用</th>
+                        <th>排序</th>
+
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <script id="arlist" type="text/html">
+                        {{# for(var i=0;i<d.length;i++){  }}
+                            <tr>
+                                <td>{{d[i].id}}</td>
+                                <td>{{d[i].name}}</td>
+                                <td>{{d[i].url}}</td>
+                                <td>
+                                    {{# if(d[i].status == 1){ }}
+                                        <a href="javascript:;" class="change_status"  data-id="{{d[i].user_id}}">
+                                            <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+                                        </a>
+                                    {{# }else{ }}
+                                        <a href="javascript:;" class="change_status" data-id="{{d[i].user_id}}">
+                                            <div class="layui-unselect layui-form-switch"><i></i></div>
+                                        </a>
+                                    {{# } }}
+                                </td>
+                                <td>{{d[i].order_by}}</td>
+                                <td>
+                                    <a class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('edit_newsClass')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>编辑</a>
+                                    <a class="layui-btn layui-btn-small do-action" data-type="doDelOne" data-href="{:url('del_newsClass')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>删除</a>
+                                </td>
+                            </tr>
+                        {{# } }}
+                    </script>
+                    <tbody id="article_list"></tbody>
+                </table>
+            </form>
+        </div>
+        <div id="AjaxPage" style="margin-top: -57px;float: right;"></div>
+        <div style="float: right;margin-top: -9px;margin-right: 13px;">
+            共{$count}条数据，<span id="allpage"></span>
+        </div>
+    </div>
+</div>
+{include file="public/footer"}
+<script>
+    var url='{:url("nav/nav_list")}';
+    var laytpl,laypage;
+    var allpages='{$allpage}';
+    layui.use(['layer', 'laypage','common', 'icheck','laytpl'], function () {
+        var $ = layui.jquery
+                , layer = layui.layer
+                , common = layui.common;
+        laytpl =layui.laytpl;
+        laypage = layui.laypage;
+
+        common.Ajaxpage();
+
+        //改变状态
+        $(document).on('click','.change_status', function () {
+            var id=$(this).attr('data-id');
+
+            var obs=$(this);
+            $.ajax({
+                url: '{:url("nav_class_state")}',
+                dataType: "json",
+                data:{'id':id},
+                type: "POST",
+                success: function(data){
+
+
+                    if(data.code == 1){
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj)
+                {
+                    if(ajaxobj.responseText!='')
+                        alert(ajaxobj.responseText);
+                }
+            });
+
+        });
+    });
+</script>

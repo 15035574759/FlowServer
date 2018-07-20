@@ -1,0 +1,167 @@
+{include file="public/header"/}
+<style>
+    .layui-form-switch {
+        padding-left: 0px;
+        transition: .1s linear;
+    }
+    .layui-table tr th{text-align: center;}
+    .layui-table tr td{text-align: center;}
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>项目列表</h2>
+    </blockquote>
+    <div class="y-role">
+        <!--工具栏-->
+        <div id="floatHead" class="toolbar-wrap">
+            <div class="toolbar">
+                <div class="box-wrap">
+                    <a class="menu-btn"></a>
+                    <div class="l-list">
+                        <a class="layui-btn layui-btn-small do-action" data-type="doAdd" data-href="{:url('project_add')}"><i class="fa fa-plus"></i>新增</a>
+                        <a class="layui-btn layui-btn-small do-action" data-type="doDelete" data-href="{:url('del_log')}"><i class="fa fa-trash-o"></i>删除</a>
+                        <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href=""><i class="fa fa-refresh fa-spin"></i>刷新</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/工具栏-->
+        <!--文字列表-->
+        <div class="fhui-admin-table-container">
+            <!-- <form action="/_Admin/Nav_list" class="form-horizontal" id="formrec" method="post" role="form"> -->
+                <table class="layui-table" lay-skin="line">
+                <!-- <colgroup>
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="8%">
+                    <col width="10%">
+                    <col width="6%">
+                    <col width="12%">
+                    <col width="10%">
+                    <col width="20%">
+                </colgroup> -->
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>项目名称</th>
+                    <th>项目封面图</th>
+                    <th>项目描述</th>
+                    <th>项目分类</th>
+                    <th>项目周期</th>
+                    <!-- <th>项目地址</th> -->
+                    <th>项目标签</th>
+                    <th style="text-align:center">操作</th>
+                </tr>
+                </thead>
+                 <script id="arlist" type="text/html">
+                    {{# for(var i=0;i<d.length;i++){ }}
+                        <tr>
+                            <td>{{d[i].id}}</td>
+                            <td>
+                                <a href='{:url("order_list")}'>{{d[i].project_name}}</a>
+                            </td>
+                            <td><img src="{{d[i].project_img}}" alt="" width="100" height="80"></td>
+                            <td>{{d[i].describe}}</td>
+                            <td>
+                                {{# for(var j=0;j<d[i].class_id.length;j++){ }}
+                                    <span class="layui-btn layui-btn-primary layui-btn-mini">{{ d[i].class_id[j].class_name }}</span>
+                                {{# } }}
+                            </td>
+                            <td>{{d[i].period}}</td>
+                            <!-- <td>{{d[i].time}</td> -->
+                           <!--  <td style="text-align:left;"><a href="{{d[i].line_url}}" target="_blank">{{d[i].line_url}}</a></td> -->
+                            <td>
+                                {{# for(var k=0;k<d[i].label_id.length;k++){ }}
+                                    <span class="layui-btn layui-btn-primary layui-btn-mini">{{ d[i].label_id[k].label_name }}</span>
+                                {{# } }}
+                            </td>
+                            <td align="center">
+                                <button class="layui-btn layui-btn-small GetCopy" data-url="{{d[i].line_url}}">复制链接</button>
+                                <!-- <a class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('project_update')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>编辑</a>
+                                <a class="layui-btn layui-btn-small do-action" data-type="doDelOne" data-href="{:url('project_delete')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>删除</a> -->
+                            </td>
+                        </tr>
+                    {{# } }}
+                 </script>
+                <tbody id="article_list"></tbody>
+                <input type="hidden" id="input">
+                <input type="text" id="CopyUrl" value="" style="color:#FFFFFF;width:50px;position: absolute;margin-top:-25px;opacity:0;">   <!-- 复制地址 -->
+            </table>
+            <!-- </form> -->
+        </div>
+        <div id="AjaxPage" style="margin-top: -57px;float: right;"></div>
+        <div style="float: right;margin-top: -9px;margin-right: 13px;">
+            共{$count}条数据，<span id="allpage"></span>
+        </div>
+    </div>
+</div>
+
+{include file="public/footer"}
+<script>
+    var laytpl,laypage;
+    var url='{:url("thorproject/project_list")}';
+    var allpages='{$allpage}';
+    layui.use(['layer', 'laypage','common', 'icheck','laytpl'], function () {
+        var $ = layui.jquery
+                , layer = layui.layer
+                , common = layui.common;
+        laytpl =layui.laytpl;
+        laypage = layui.laypage;
+
+        common.Ajaxpage();
+
+        //加载单选框样式
+        $(("[type='checkbox']")).iCheck({
+            checkboxClass: 'icheckbox_square-green',
+        });
+
+        //点击复制地址
+        $(document).on("click",".GetCopy",function(){
+            var url = $(this).attr('data-url');
+            $("#CopyUrl").val(url)
+            var Url2 = document.getElementById("CopyUrl");
+            // console.log(url)
+            Url2.select(); // 选择对象
+            document.execCommand("Copy"); // 执行浏览器复制命令
+            alert("已复制");
+        });
+
+        //全选
+        $(document).on('ifChanged','.selected-all', function (event) {
+            // alert(1);
+            var $input = $('.layui-table tbody tr td').find('input');
+            $input.iCheck(event.currentTarget.checked ? 'check' : 'uncheck');
+        });
+
+        //点击改变状态
+         $(document).on('click','.change_status', function () {
+            var id=$(this).attr('data-id');
+            var obs=$(this);
+            $.ajax({
+                url: '{:url("ProjectStart")}',
+                dataType: "json",
+                data:{'id':id},
+                type: "POST",
+                success: function(data){
+
+
+                    if(data.code == 1){
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj)
+                {
+                    if(ajaxobj.responseText!='')
+                        alert(ajaxobj.responseText);
+                }
+            });
+        });
+    });
+</script>

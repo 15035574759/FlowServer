@@ -1,0 +1,336 @@
+{include file="public/header"/}
+<style>
+    .layui-form-switch {
+        padding-left: 0px;
+        transition: .1s linear;
+    }
+    .layui-table tr th{text-align: center;}
+    .layui-table tr td{text-align: center;}
+</style>
+<style>
+
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>{$project_name}-用户留资列表</h2>
+    </blockquote>
+    <div class="y-role">
+        <!--工具栏-->
+        <div id="floatHead" class="toolbar-wrap">
+            <div class="toolbar">
+                <div class="box-wrap">
+                    <a class="menu-btn"></a>
+                    <div class="l-list">
+                        <!-- <a class="layui-btn layui-btn-small do-action" data-type="" data-href=""><i class="fa fa-trash-o"></i>开始</a> -->
+                        <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href="{:url('Capital/UserDealerList',['project_id'=>$project_id])}"><i class="fa fa-refresh fa-spin"></i>刷新</a>
+                        {if $count > 10000}
+                        <a class="layui-btn layui-btn-small do-action" target="_blank" href="{:url('Excel/UserInfoListExcel',['project_id'=>$project_id])}">导出最新万条数据</a>
+                        {else/}
+                        <a class="layui-btn layui-btn-small do-action" target="_blank" href="{:url('Excel/UserInfoListExcel',['project_id'=>$project_id])}">导出全部数据</a>
+                        {/if}
+                        {if $status == ''}
+                          <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href="{:url('Capital/UserDealerList',['project_id'=>$project_id,'status'=>1])}"><i class="fa fa-trash-o"></i>过滤垃圾数据</a>
+                        {elseif $status == 1}
+                          <a class="layui-btn layui-btn-disabled layui-btn-radius" data-type="doRefresh" data-href="{:url('Capital/UserDealerList',['project_id'=>$project_id,'status'=>1])}"><i class="fa fa-trash-o"></i>过滤垃圾数据</a>
+                        {/if}
+                        {if session('admin_uid') == 1}
+                          <a class="layui-btn layui-btn-small do-action" href="{:url('Project/updateProjectLog',['project_id'=>$project_id])}">查看修改日志</a>
+                        {else/}
+                          <a class="layui-btn layui-btn-disabled do-action" href="javascript:;">查看修改日志</a>
+                        {/if}
+                        <div class="zySearch" id="zySearch"></div>
+                            <!-- <div class="zySearch" id="zySearch"></div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+      {if $source_start == 1}    <!-- 显示一表多开功能搜索 -->
+          <div class="layui-form" style="width:400px;margin-top:20px;margin-bottom:-10px;float:left;">
+            <div class="layui-form-item">
+              <label class="layui-form-label">区域品牌</label>
+              <!-- <button>11111</button> -->
+              <div class="layui-input-block" style="position: absolute;">
+                <select name="city" lay-verify="required" id="getSelect" lay-filter="pageFilter">
+                      <option value="0">全部</option>
+                    {foreach name="MoreConfigName" item="v"}
+                      <option value="{$v.0}" {if $v.0 == $moreName} selected="selected" {/if}>{$v.1}</option>
+                    {/foreach}
+                </select>
+              </div>
+
+            </div>
+          </div>
+        {/if}
+      {if $is_column == 1}
+        <div class="layui-form" style="width:400px;margin-top:20px;margin-bottom:-10px;float:left;">
+            <div class="layui-form-item">
+              <label class="layui-form-label">留资来源</label>
+              <!-- <button>11111</button> -->
+              <div class="layui-input-block" style="position: absolute;">
+                <select name="source_end" lay-verify="required" id="source_end" lay-filter="pageFilter1">
+                      <option value="0">全部</option>
+                      <option value="1" {if $source_end == 1} selected="selected" {/if}>pc端</option>
+                      <option value="2" {if $source_end == 2} selected="selected" {/if}>移动端</option>
+                </select>
+              </div>
+
+            </div>
+          </div>
+        {/if}
+        {if $source_start == 1 || $is_column == 1}
+         <div style="margin-top:21px;">
+                <!-- <a href="#" style="position: relative;left:-10px;">111</a> -->
+                <a class="layui-btn layui-btn-small do-action" target="_blank" {if $source_start == 1} href="{:url('Excel/UserInfoListExcel',['project_id'=>$project_id,'source_end'=>$source_end,'more_name'=>$moreName])}" {else/} href="{:url('Excel/UserInfoListExcel',['project_id'=>$project_id,'source_end'=>$source_end])}" {/if} style="float:left;line-height:35px;height:35px;">导出对应数据</a>
+              </div>
+        {/if}
+        <!-- <input type="hidden" name="table" value=""> -->
+        <!--/工具栏-->
+        <!--文字列表-->
+        <div class="fhui-admin-table-container">
+
+                <table class="layui-table" lay-skin="line">
+                  <!-- <colgroup>
+                      <col width="2%">
+                      <col width="5%">
+                      <col width="2%">
+                      <col width="2%">
+                      <col width="10%">
+                      <col width="10%">
+                      <col width="5%">
+                      <col width="8%">
+                      <col width="3%">
+                      <col width="3%">
+                      <col width="3%">
+                      <col width="10%">
+                  </colgroup> -->
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>手机号</th>
+                    {if $draw_id > 0}
+                      <th>中奖信息</th>
+                    {/if}
+                    <th>经销商</th>
+                    <th>感兴趣车型</th>
+                    <th>计划购车时间</th>
+                    <th>注册时间</th>
+                    <th>来源渠道</th>
+                    <!-- {if $source_start == 1}
+                      <th>来源品牌</th>
+                    {/if} -->
+                    <th>留资来源</th>
+                    <th>其他</th>
+                    <!-- <th style="text-align:center">是否启用</th> -->
+                    <th style="text-align:center">操作</th>
+                </tr>
+                </thead>
+
+                <script id="arlist" type="text/html">
+                {{# for(var i=0;i<d.length;i++){  }}
+                <tr>
+                    <td>{{d[i].user_id}}</td>
+                    <td>{{d[i].name}}</td>
+                    <td>{{d[i].sex}}</td>
+                    <td>{{d[i].mobile}}</td>
+                    {if $draw_id > 0}
+                      <td>{{d[i].draw_name}}</td>
+                    {/if}
+                    <td>{{d[i].dealer_name}}</td>
+                    <td>{{d[i].car_type}}</td>
+                    <td>{{d[i].buy_time}}</td>
+                    <td>{{d[i].time}}</td>
+                    <td>{{d[i].source}}</td>
+                    <!-- {if $source_start == 1}
+                      <td>{{d[i].more_name}}</td>
+                    {/if} -->
+                    <td>{{# if(d[i].source_end == 1){ }}
+                            pc端
+                         {{# }else if(d[i].source_end == 2){ }}
+                            移动端
+                         {{# }else{ }}
+                            其他
+                         {{# } }}
+                    </td>
+                    <td>{{# if(d[i].others){ }}
+                            {{d[i].others}}
+                         {{# }else{ }}
+                            未知
+                         {{# } }}
+                    </td>
+                    <!-- <td align="center">
+                            {{# if(d[i].status == 1){ }}
+                            <a href="javascript:;" class="change_status"  data-id="{{d[i].dealer_id}}">
+                                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+                            </a>
+                            {{# }else{ }}
+                            <a href="javascript:;" class="change_status" data-id="{{d[i].dealer_id}}">
+                                <div class="layui-unselect layui-form-switch"><i></i></div>
+                            </a>
+                            {{# } }}
+                    </td> -->
+                    <td align="center">
+                        {{# if(d[i].pay_status == 1){ }}
+                          <a class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('order/order_list',['table'=>$table])}" data-id="{{d[i].user_id}}">查看订单</a>
+                        {{# } }}
+                        <a class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('BuserWedit')}" data-id="{{d[i].dealer_id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>编辑</a>
+                        <a class="layui-btn layui-btn-small do-action" data-type="doDelOne" data-href="{:url('DealerDel',['table'=>$table])}" data-id="{{d[i].user_id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>删除</a>
+                    </td>
+                </tr>
+                 {{# } }}
+                 </script>
+                 <tbody id="article_list"></tbody>
+            </table>
+           <!-- <div id="demo" style='float:right;'></div>    -->
+        </div>
+        <div id="AjaxPage" style="margin-top: -57px;float: right;"></div>
+        <div style="float: right;margin-top: -9px;margin-right: 13px;">
+            共{$count}条数据，<span id="allpage"></span>
+        </div>
+    </div>
+</div>
+
+<input name="phone" type="hidden" value="{$phone}">
+<input name="moreName" type="hidden" value="{$moreName}">
+<input name="source_end" type="hidden" value="{$source_end}">
+<input name="status" type="hidden" value="{$status}">
+{include file="public/footer"}
+<!-- <script src="/javascript/layui2.0/dist/layui.js"></script>
+<link href="/javascript/layui2.0/dist/css/layui.css" /> -->
+<script>
+    /**
+     * [user_state 文章状态]
+     * @param  {[type]} val [description]
+     * @Author[jonny 980218641@qq.com]
+     */
+    var phone = $("input[name='phone']").val();
+    var moreName = $("input[name='moreName']").val();
+    var source_end = $("input[name='source_end']").val();
+    var status = $("input[name='status']").val();
+    var laytpl,laypage;
+    var table = "{$table}";
+    var project_id = "{$project_id}";
+    var url='{:url("Capital/UserDealerList")}?table='+table+'&project_id='+project_id;
+    if(phone != "")
+    {
+        var url='{:url("Capital/UserDealerList")}?phone='+phone+'&table='+table+'&more_name='+moreName+'&project_id='+project_id;
+    }
+
+    if(status != "")
+    {
+        var url='{:url("Capital/UserDealerList")}?table='+table+'&project_id='+project_id+'&status='+status;
+    }
+
+     if(moreName != "")
+    {
+        url+='&more_name='+moreName;
+    }
+
+    if(source_end != "")
+    {
+        url+='&source_end='+source_end;
+    }
+
+    var allpages='{$allpage}';
+    layui.use(['layer', 'laypage','common', 'icheck','laytpl','element'], function () {
+        var $ = layui.jquery
+        , layer = layui.layer
+        , common = layui.common
+        laytpl =layui.laytpl;
+        laypage = layui.laypage;
+
+        common.Ajaxpage();
+
+        $('.site-demo-active').on('click', function(){
+          var othis = $(this), type = $(this).data('type');
+          active[type] ? active[type].call(this, othis) : '';
+        });
+
+        //点击改变状态
+         $(document).on('click','.change_status', function () {
+            var id=$(this).attr('data-id');
+            var obs=$(this);
+            $.ajax({
+                url: '{:url("BstateWleval")}',
+                dataType: "json",
+                data:{'id':id},
+                type: "POST",
+                success: function(data){
+
+
+                    if(data.code == 1){
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj)
+                {
+                    if(ajaxobj.responseText!='')
+                        alert(ajaxobj.responseText);
+                }
+            });
+        });
+
+        $('#layerDemo .layui-btn').on('click', function(){
+          var othis = $(this), method = othis.data('method');
+          active[method] ? active[method].call(this, othis) : '';
+        });
+
+        //全选
+        $(document).on('ifChanged','.selected-all', function (event) {
+            // alert(1);
+            var $input = $('.layui-table tbody tr td').find('input');
+            $input.iCheck(event.currentTarget.checked ? 'check' : 'uncheck');
+        });
+
+    });
+</script>
+<script type="text/javascript">
+layui.use(['layedit', 'laydate','common','upload','form'], function(){
+  var form = layui.form()
+  ,layer = layui.layer
+  ,common=layui.common
+  //下拉框事件
+  form.on('select(pageFilter)', function(data){
+    var project_id = "{$project_id}";
+    var source_end = $("#source_end").val();
+    if (source_end != undefined) {
+      window.location.href="/index.php/admin/Capital/UserDealerList.html?project_id="+project_id+"&more_name="+data.value+"&source_end="+source_end;
+    } else {
+      window.location.href="/index.php/admin/Capital/UserDealerList.html?project_id="+project_id+"&more_name="+data.value;
+    }
+
+  });
+
+  form.on('select(pageFilter1)', function(data){
+    var project_id = "{$project_id}";
+    var more_name = $("#getSelect").val();
+    if (more_name != undefined) {
+      window.location.href="/index.php/admin/Capital/UserDealerList.html?project_id="+project_id+"&source_end="+data.value+"&more_name="+more_name;
+    } else {
+      window.location.href="/index.php/admin/Capital/UserDealerList.html?project_id="+project_id+"&source_end="+data.value;
+    }
+
+  });
+  $("#zySearch").zySearch({
+    "width":"355",
+    "height":"33",
+    "parentClass":"pageTitle",
+    "callback":function(keyword){
+      console.info("搜索的关键字");
+      console.info(keyword);
+    }
+  });
+  var table = "{$table}";
+  $(".search-btn").click(function(){
+      var phone = $("#searchInput").val();
+      var project_id = "{$project_id}";
+      window.location.href="/index.php/admin/Capital/UserDealerList.html?phone="+phone+"&table="+table+"&project_id="+project_id;
+  })
+})
+
+</script>

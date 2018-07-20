@@ -1,0 +1,486 @@
+{include file="public/header"}
+<!-- <script src="/javascript/layui2.0/dist/layui.js" charset="utf-8"></script> -->
+<style>
+    .site-demo-upload,
+    .site-demo-upload img{width: 200px; height: 200px; border-radius: 100%;}
+    .site-demo-upload{position: relative; background: #e2e2e2;}
+    .site-demo-upload .site-demo-upbar{position: absolute; top: 50%; left: 50%; margin: -18px 0 0 -56px;}
+    .site-demo-upload .layui-upload-button{background-color: rgba(0,0,0,.2); color: rgba(255,255,255,1);}
+    .upload-img{
+        margin-left: 95px;
+        margin-top: 10px;
+    }
+    .upload-img img{
+        margin-top: -38px;
+    }
+    .layui-form-label {
+      width:100px;
+    }
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>添加项目</h2>
+    </blockquote>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">项目名称</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="project_name" placeholder="项目名称"  lay-verify="project_name">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">封面图</label>
+            <div class="site-demo-upload upload-img">
+                <img id="default_img" src="__img__/tong.jpg">
+                <div class="site-demo-upbar">
+                        <input type="file" name="file" class="layui-upload-file" id="upload_ad_image">
+                        <input type="hidden" id="images" name="project_img" value="http://www.flows.com/Flow/public/statisc/img/tong.jpg">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">项目描述</label>
+          <div class="layui-input-block">
+            <textarea placeholder="请输入内容" style="width:600px;" name="describe" class="layui-textarea"></textarea>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">技术标签</label>
+          <input type="hidden" name="labelId" value="" lay-verify="label_id">
+          <div class="layui-input-block">
+            {foreach name="LabelData" item="v"}
+              <input type="checkbox" id="boxGet" value="{$v.b_id}" title="{$v.label_name}">
+            {/foreach}
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+          <label class="layui-form-label">技术分类</label>
+          <input type="hidden" name="classId" value="0" lay-verify="class_id">
+          <div class="layui-input-block">
+            {foreach name="ClassData" item="v"}
+              <input type="checkbox" id="BoxClass" value="{$v.c_id}" title="{$v.class_name}">
+            {/foreach}
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">URL地址</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="line_url" placeholder="https://h5.xingyunanauto.com"  lay-verify="title" style="width:600px;">
+            </div>
+            <span style="color:#aaa;margin-left:220px;">* 项目最终上线地址url</span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户经销商状态</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" name="user_start" lay-skin="switch" lay-filter="switchuserstart" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+        <div id="UserCheckboxStart" style="display:none;">
+          <div class="layui-form-item">
+            <label class="layui-form-label">用户表名 </label>
+            <div class="layui-input-inline">
+              <input class="layui-input" type="text" name="user_table" placeholder="项目用户表" value="" lay-verify="user_table">
+            </div>
+            <span style="color:#aaa;">* 这里添加项目用户表名 注: 以user_开头命名</span>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">经销商表名</label>
+            <div class="layui-input-inline">
+              <input class="layui-input" type="text" name="dealer_table" placeholder="经销商表" value="" lay-verify="dealer_table">
+            </div>
+            <span style="color:#aaa;">* 这里添加项目用户表名 注: 以dealer_开头命名</span>
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">来源渠道</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" value="source_start" name="source_start" lay-skin="switch" lay-filter="switchsource" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text" id="switchsource" style="display:none;">
+          <label class="layui-form-label">来源渠道配置</label>
+          <div class="layui-input-block">
+            <textarea placeholder="jrtt:进今日头条" style="width:600px;" name="source_config" class="layui-textarea"></textarea>
+            <span style="color:#aaa;">* 这里添加项目来源渠道配置文件 例如：jrtt:进今日头条 回车确进行下一个</span>
+          </div>
+        </div>
+
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">单表多开</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" name="more_start" lay-skin="switch" lay-filter="switchmore" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div> -->
+        <!--<div class="layui-form-item layui-form-text" id="switchmore" style="display:none;">
+          <label class="layui-form-label">多种品牌或者类型</label>
+          <div class="layui-input-block">
+            <textarea placeholder="丰田" style="width:600px;" name="more_config" class="layui-textarea"></textarea>
+            <span style="color:#aaa;">* 这里添加项目多品牌以及多类型 例如：宝马 回车确进行下一个</span>
+          </div>
+        </div> -->
+
+    <div class="layui-form-item" style="margin-top: 15px;">
+       <div class="layui-form-item">
+         <label class="layui-form-label">上线时间</label>
+         <div class="layui-inline">
+          <input class="layui-input" name="lines_time" placeholder="自定义日期格式" onclick="layui.laydate({elem: this, istime: true, format: 'YYYY-MM-DD hh:mm:ss'})">
+        </div>
+       </div>
+     </div>
+
+       <div class="layui-form-item" style="margin-top: 15px;">
+          <div class="layui-form-item">
+            <label class="layui-form-label">项目周期</label>
+            <!-- <div class="layui-input-inline">
+              <input type="text" class="layui-input" id="test10" placeholder=" - ">
+            </div> -->
+            <div class="layui-input-inline">
+              <input class="layui-input" name="beginPeriod" placeholder="开始日" id="LAY_demorange_s" style="width:200px;">
+            </div>
+            <div class="layui-input-inline">
+              <input class="layui-input" name="endPeriod" placeholder="截止日" id="LAY_demorange_e" style="width:200px;margin-left:-150px;" onclick="layui.laydate({elem: this, istime: true, format: 'YYYY-MM-DD hh:mm:ss'})">
+            </div>
+          </div>
+        </div>
+
+       <div class="layui-form-item">
+          <label class="layui-form-label">选择活动</label>
+          <div class="layui-input-block" style="float:left;margin-left:-5px;">
+            <select name="draw_id" lay-filter="aihao">
+              <option value="0">==请选择==</option>
+              {foreach name="data" item="v"}
+                <option value="{$v.draw_id}">{$v.draw_name}</option>
+              {/foreach}
+            </select>
+          </div>
+        </div>
+        <!-- <div class="layui-form-item" style="width: 300px;">
+          <label class="layui-form-label">項目分类</label>
+          <div class="layui-input-block">
+            <select name="class_id" lay-filter="aihao">
+              <option value="0">==请选择==</option>
+              {foreach name="ClassData" item="v"}
+                <option value="{$v.c_id}">{$v.class_name}</option>
+              {/foreach}
+            </select>
+          </div>
+        </div> -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" checked="" name="start" lay-skin="switch" lay-filter="switchTest" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="sort" placeholder="排序" value="{$projectId}" lay-verify="number" style="width:100px;">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">其他项目</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" name="other_start" lay-skin="switch" lay-filter="switchTest" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+
+        <!-- 山海经项目后续未定 -->
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">山海经项目</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" name="stage_start" lay-skin="switch" lay-filter="switchTest" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div> -->
+
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width:100px;">是否开启留言</label>
+            <div class="layui-input-inline">
+                <input type="checkbox"  name="leave_start" lay-skin="switch" lay-filter="switchLeaveStart" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+        <div id="switchleavel" style="display:none;">
+          <div class="layui-form-item">
+            <label class="layui-form-label">留言表名 </label>
+            <div class="layui-input-inline">
+              <input class="layui-input" type="text" name="leave_table" placeholder="项目用户表" value="" lay-verify="title">
+            </div>
+            <span style="color:#aaa;">* 这里添加项目留言表名</span>
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="add-role" data-href="{:url('project_add')}">立即提交</button>
+                <a class="layui-btn layui-btn-small do-action" data-type="doGoBack" data-href=""><i class="fa fa-mail-reply"></i>返回上一页</a>
+            </div>
+        </div>
+    </form>
+<!-- <button data-method="offset" data-type="auto" class="layui-btn layui-btn-normal">居中弹出</button> -->
+</div>
+{include file="public/footer"}
+
+<script>
+    layui.use(['layedit', 'laydate','common','upload','form'], function(){
+      var form = layui.form()
+      ,layer = layui.layer
+      ,common=layui.common
+      ,layedit = layui.layedit
+      ,laydate = layui.laydate;
+
+      //创建一个编辑器
+      var editIndex = layedit.build('LAY_demo_editor');
+
+      //自定义验证规则
+      form.verify({
+          project_name: function(value) {
+            if(value == ''){
+             return '项目名称不能为空';
+           }
+          }
+          ,user_table: function(value){
+            if($("input[name='user_start']").attr('checked')) {
+               if(value.substring(0,5) !== 'user_'){
+                return '必须以 user_ 开头';
+              }
+            }
+          }
+      });
+
+      //监听指定开关状态
+      form.on('switch(switchTest)', function(data){
+        layer.msg('开关checked：'+ (this.checked ? 'true' : 'false'), {
+          offset: '6px'
+        });
+        layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+      });
+
+      //监听用户经销商状态
+      form.on('switch(switchuserstart)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#UserCheckboxStart").show();
+        }
+        else
+        {
+            $("#UserCheckboxStart").css('display','none');
+        }
+      });
+
+      //监听项目来源地址配置文件
+      form.on('switch(switchsource)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#switchsource").show();
+        }
+        else
+        {
+            $("#switchsource").css('display','none');
+        }
+      });
+
+      //监听项目多类型以及多品牌配置
+      form.on('switch(switchmore)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#switchmore").show();
+        }
+        else
+        {
+            $("#switchmore").css('display','none');
+        }
+      });
+
+      //监听项目是否开启留言功能
+      form.on('switch(switchLeaveStart)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#switchleavel").show();
+        }
+        else
+        {
+            $("#switchleavel").css('display','none');
+        }
+      });
+
+
+      //上传封面图片
+        layui.upload({
+                // url: "/admin/Upload/uploadProjectImage"
+             url: "{:url('Upload/uploadProjectImage')}" //上传接口
+            ,before: function(input){
+                //返回的参数item，即为当前的input DOM对象
+                console.log('图片上传中');
+            }
+            ,title:'上传封面图'
+            ,elem: '#upload_ad_image' //指定原始元素，默认直接查找class="layui-upload-file"
+            ,method: 'post' //上传接口的http类型
+            ,ext: 'jpg|png|gif'
+            ,type:'images'
+            ,success: function(data){ //上传成功后的回调
+                //console.log(res)
+                if(data.status == 1){
+                    $("#images").val('/upload/testfile/' +data.image_name);
+                    $("#default_img").attr('src', '/upload/testfile/' + data.image_name).show();
+                }else{
+                    alert(data.error_info);
+                }
+
+            }
+        });
+
+      //获取复选框值
+      // var editIndex = layedit.build('LAY_demo_editor');
+      // form.on('checkbox', function (data) {
+      //   alert("0000");
+
+      //   $("input[name='classId']").val(class_id);
+      // });
+
+      //获取复选款值
+      form.on('checkbox', function (data) {
+
+        //获取技术分类数据
+        var class_id = $("#BoxClass:checked").map(function(index,elem) {
+          return $(elem).val();
+        }).get().join(',');
+        $("input[name='classId']").val(class_id);
+
+        //获取标签数据
+        var val = data.value;
+        var label_id = '';
+        var str = [];
+        if($("#boxGet:checked").length>0){
+          var checked = $("#boxGet:checked");
+          for(var i =0;i<checked.length;i++){
+              label_id+=$(checked[i]).val()+',';
+              str[i]= $(checked[i]).val();
+          }
+        }
+
+        if(str.length > 4)
+        {
+            common.layerAlertE("标签最多选择4个", '提示');
+
+            $('input[value="'+val+'"]').next().removeClass("layui-form-checked");
+             $('input[value="'+val+'"]').attr('checked',false);
+             for(var i=0;i<str.length;i++){
+              if(str[i] == val){
+                str.splice(i, 1);
+              }
+
+             }
+        }
+        label_id = str.join(',');
+            // console.log(label_id);
+        $("input[name='labelId']").val(label_id);//复制隐藏域
+      });
+
+      //检测该用户表是否对应多个渠道
+      // $("input[name='user_table']").blur(function(){
+      //   $.ajax({
+      //       url: "{:url('TestingTable')}",
+      //       type: 'post',
+      //       dataType: 'json',
+      //       data: {user_table:$(this).val()},
+      //       success: function (data) {
+      //           if (data.code == 1) {
+      //             $("#switchsource").show();
+      //             $("input:checkbox[value='source_start']").attr('checked',true);
+      //             form.render('checkbox');
+      //             $(":input[name='source_config']").text(data.data);
+      //           } else {
+      //             return false;
+      //               // common.layerAlertE(data.msg, '提示');
+      //           }
+      //       },
+      //       error: function (XMLHttpRequest, textStatus, errorThrown) {
+      //           common.layerAlertE(textStatus, '提示');
+      //       }
+      //   });
+      // })
+
+      //监听提交
+      form.on('submit(add-role)', function(data){
+            var sub=true;
+            var url=$(this).data('href');
+            if(url){
+                if(sub){
+                    $.ajax({
+                        url: url,
+                        type: 'post',
+                        dataType: 'json',
+                        data: data.field,
+                        success: function (data) {
+                            if (data.code == 1) {
+                                // location.href = rturl;
+                                common.layerAlertS(data.msg, '提示');
+                                window.location.href="{:url('project_list')}";
+                            }
+                            else {
+                                common.layerAlertE(data.msg, '提示');
+                            }
+                        },
+                        // beforeSend: function () {
+                        //     //    // 一般是禁用按钮等防止用户重复提交
+                        //     $(data.elem).attr("disabled", "true").text("提交中...");
+                        // },
+                        //complete: function () {
+                        //    $(sbbtn).removeAttr("disabled");
+                        //},
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            common.layerAlertE(textStatus, '提示');
+                        }
+                    });
+                }
+            }else{
+                common.layerAlertE('链接错误！', '提示');
+            }
+
+            return false;
+        });
+
+      /********************* 时间选择器控件 start *******************************/
+         var start = {
+               max: '2099-06-16 23:59:59'
+              ,istoday: false
+              ,istime:true
+              ,format: 'YYYY-MM-DD'
+              ,choose: function(datas){
+                end.min = datas; //开始日选好后，重置结束日的最小日期
+                // end.start = datas //将结束日的初始值设定为开始日
+              }
+        };
+
+        var end = {
+           min: laydate.now()
+          ,max: '2099-06-16 23:59:59'
+          ,istoday: false
+          ,istime:true
+          ,format: 'YYYY-MM-DD'
+          ,choose: function(datas){
+            start.max = datas; //结束日选好后，重置开始日的最大日期
+          }
+        };
+
+        document.getElementById('LAY_demorange_s').onclick = function(){
+          start.elem = this;
+          laydate(start);
+        }
+        document.getElementById('LAY_demorange_e').onclick = function(){
+          end.elem = this
+          laydate(end);
+        }
+
+      /********************* 时间选择器控件 end *******************************/
+
+});
+</script>

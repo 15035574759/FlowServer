@@ -1,0 +1,530 @@
+{include file="public/header"}
+<style>
+    .site-demo-upload,
+    .site-demo-upload img{width: 200px; height: 200px; border-radius: 100%;}
+    .site-demo-upload{position: relative; background: #e2e2e2;}
+    .site-demo-upload .site-demo-upbar{position: absolute; top: 50%; left: 50%; margin: -18px 0 0 -56px;}
+    .site-demo-upload .layui-upload-button{background-color: rgba(0,0,0,.2); color: rgba(255,255,255,1);}
+    .upload-img{
+        margin-left: 95px;
+        margin-top: 10px;
+    }
+    .upload-img img{
+        margin-top: -38px;
+    }
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>修改项目</h2>
+    </blockquote>
+    <form class="layui-form">
+    <input type="hidden" name="id" value="{$id}">
+        <div class="layui-form-item">
+            <label class="layui-form-label">项目名称</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" value="{$data['project_name']}" name="project_name" placeholder="项目名称"  lay-verify="title">
+            </div>
+        </div>
+         <div class="layui-form-item layui-form-text">
+           <input type="hidden" name="img_start" value="0">
+            <label class="layui-form-label">封面图</label>
+            <div class="site-demo-upload upload-img">
+                <img id="default_img" src="{if $data['project_img'] eq ''}__img__/tong.jpg{else}{$data['project_img']}{/if}">
+                <div class="site-demo-upbar">
+                        <input type="file" name="file" class="layui-upload-file" id="upload_ad_image">
+                        <input type="hidden" id="images" name="project_img" value="{if $data['project_img'] eq ''}__img__/tong.jpg{else}{$data['project_img']}{/if}">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">项目描述</label>
+          <div class="layui-input-block">
+            <textarea placeholder="请输入内容" style="width:600px;" name="describe" class="layui-textarea">{$data['describe']}</textarea>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">技术标签</label>
+          <input type="hidden" name="labelId" value="{$data['label_id']}" lay-verify="label_id">
+          <div class="layui-input-block">
+            {foreach name="LabelData" item="v"}
+              <input type="checkbox" id="boxGet" value="{$v.b_id}" {if $v.num eq 1} checked="" {/if} title="{$v.label_name}">
+            {/foreach}
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+          <label class="layui-form-label">技术分类</label>
+          <input type="hidden" name="classId" value="{$data['class_id']}" lay-verify="class_id">
+          <div class="layui-input-block">
+            {foreach name="ClassData" item="v"}
+              <input type="checkbox" id="BoxClass" value="{$v.c_id}" {if $v.num eq 1} checked="" {/if} title="{$v.class_name}">
+            {/foreach}
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">URL地址</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="line_url" value="{$data['line_url']}" placeholder="https://h5.xingyunanauto.com"  lay-verify="title" style="width:600px;">
+            </div>
+            <span style="color:#aaa;margin-left:220px;">* 项目最终上线地址url</span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">用户经销商状态</label>
+            <div class="layui-input-inline">
+              {if $data['user_start'] == 1}
+                <input type="checkbox" checked="" name="user_start" lay-skin="switch" lay-filter="switchuserstart" title="开关">
+              {else/}
+                <input type="checkbox" name="user_start" lay-skin="switch" lay-filter="switchuserstart" title="开关">
+              {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+        {if $data['user_start'] == 1}
+            <div id="UserCheckboxStart">
+              <div class="layui-form-item">
+                <label class="layui-form-label">用户表名 </label>
+                <div class="layui-input-inline">
+                  <input class="layui-input" type="text" name="user_table" placeholder="项目用户表" value="{$UserDealerTable['user_table']}" lay-verify="title">
+                </div>
+                <span style="color:#aaa;">* 这里添加项目用户表名 注: 以user_开头命名</span>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label">经销商表名</label>
+                <div class="layui-input-inline">
+                  <input class="layui-input" type="text" name="dealer_table" placeholder="经销商表" value="{$UserDealerTable['dealer_table']}" lay-verify="title">
+                </div>
+                <span style="color:#aaa;">* 这里添加项目用户表名 注: 以user_开头命名</span>
+              </div>
+            </div>
+        {else/}
+            <div id="UserCheckboxStart" style="display:none;">
+              <div class="layui-form-item">
+                <label class="layui-form-label">用户表名 </label>
+                <div class="layui-input-inline">
+                  <input class="layui-input" type="text" name="user_table" placeholder="项目用户表" value="" lay-verify="title">
+                </div>
+                <span style="color:#aaa;">* 这里添加项目用户表名 注: 以user_开头命名</span>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label">经销商表名</label>
+                <div class="layui-input-inline">
+                  <input class="layui-input" type="text" name="dealer_table" placeholder="经销商表" value="" lay-verify="title">
+                </div>
+                <span style="color:#aaa;">* 这里添加项目用户表名 注: 以user_开头命名</span>
+              </div>
+            </div>
+        {/if}
+        <div class="layui-form-item">
+            <label class="layui-form-label">来源渠道</label>
+            <div class="layui-input-inline">
+                {if $data['source_start'] == 1}
+                  <input type="checkbox" name="source_start" checked="" lay-skin="switch" lay-filter="switchsource" title="开关">
+                {else/}
+                  <input type="checkbox" name="source_start" lay-skin="switch" lay-filter="switchsource" title="开关">
+                {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+        {if $data['source_start'] == 1}
+          <div class="layui-form-item layui-form-text" id="switchsource">
+            <label class="layui-form-label">来源渠道配置</label>
+            <div class="layui-input-block">
+              <textarea placeholder="jrtt:进今日头条" style="width:600px;" name="source_config" class="layui-textarea">{$SourceConfig}</textarea>
+              <span style="color:#aaa;">* 这里添加项目来源渠道配置文件 例如：jrtt:进今日头条 回车确进行下一个</span>
+            </div>
+          </div>
+        {else/}
+          <div class="layui-form-item layui-form-text" id="switchsource" style="display:none;">
+            <label class="layui-form-label">来源渠道配置</label>
+            <div class="layui-input-block">
+              <textarea placeholder="jrtt:进今日头条" style="width:600px;" name="source_config" class="layui-textarea"></textarea>
+              <span style="color:#aaa;">* 这里添加项目来源渠道配置文件 例如：jrtt:进今日头条 回车确进行下一个</span>
+            </div>
+          </div>
+        {/if}
+
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">单表多开</label>
+            <div class="layui-input-inline">
+              {if $data['source_start'] == 1}
+                <input type="checkbox" name="source_start" checked="" lay-skin="switch" lay-filter="switchmore" title="开关">
+              {else/}
+                <input type="checkbox" name="source_start" lay-skin="switch" lay-filter="switchmore" title="开关">
+              {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div> -->
+        <!--
+        {if $data['source_start'] == 1}
+        <div class="layui-form-item layui-form-text" id="switchmore">
+          <label class="layui-form-label">多种品牌或者类型</label>
+          <div class="layui-input-block">
+            <textarea placeholder="丰田" style="width:600px;" name="more_config" class="layui-textarea">{}</textarea>
+            <span style="color:#aaa;">* 这里添加项目多品牌以及多类型 例如：宝马 回车确进行下一个</span>
+          </div>
+        </div>
+        {else/}
+        <div class="layui-form-item layui-form-text" id="switchmore" style="display:none;">
+          <label class="layui-form-label">多种品牌或者类型</label>
+          <div class="layui-input-block">
+            <textarea placeholder="丰田" style="width:600px;" name="more_config" class="layui-textarea"></textarea>
+            <span style="color:#aaa;">* 这里添加项目多品牌以及多类型 例如：宝马 回车确进行下一个</span>
+          </div>
+        </div>
+        {/if} -->
+
+      <div class="layui-form-item" style="margin-top: 15px;">
+         <div class="layui-form-item">
+           <label class="layui-form-label">上线时间</label>
+           <div class="layui-inline">
+            <input class="layui-input" name="lines_time" value="{$data['lines_time']}" placeholder="自定义日期格式" onclick="layui.laydate({elem: this, istime: true, format: 'YYYY-MM-DD hh:mm:ss'})">
+          </div>
+         </div>
+       </div>
+
+       <div class="layui-form-item" style="margin-top: 15px;">
+          <div class="layui-form-item">
+            <label class="layui-form-label">项目周期</label>
+            <div class="layui-input-inline">
+              <input class="layui-input" value="{$data['start_time']}" name="beginPeriod" placeholder="开始日" id="LAY_demorange_s">
+            </div>
+            <div class="layui-input-inline">
+              <input class="layui-input" name="endPeriod" value="{$data['end_time']}" placeholder="截止日" id="LAY_demorange_e">
+            </div>
+          </div>
+        </div>
+
+       <div class="layui-form-item" style="width: 300px;">
+          <label class="layui-form-label">选择活动</label>
+          <div class="layui-input-block">
+            <select name="draw_id" lay-filter="aihao">
+              <option value="0">==请选择==</option>
+              {foreach name="DrawData" item="v"}
+                <option value="{$v.draw_id}" {if condition="$v.draw_id eq $data['draw_id']"} selected="selected" {/if}>{$v.draw_name}</option>
+              {/foreach}
+            </select>
+          </div>
+        </div>
+
+         <!-- <div class="layui-form-item" style="width: 300px;">
+          <label class="layui-form-label">項目分类</label>
+          <div class="layui-input-block">
+            <select name="class_id" lay-filter="aihao">
+              <option value="0">==请选择==</option>
+              {foreach name="ClassData" item="v"}
+                <option value="{$v.c_id}" {if condition="$v.c_id eq $data['class_id']"} selected="selected" {/if}>{$v.class_name}</option>
+              {/foreach}
+            </select>
+          </div>
+        </div> -->
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-inline">
+              {if $data['start'] == 1}
+                <input type="checkbox" checked="" name="start" lay-skin="switch" lay-filter="switchTest" title="开关">
+                {else/}
+                  <input type="checkbox" name="other_start" lay-skin="switch" lay-filter="switchTest" title="开关">
+                {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="sort" value="{$data['sort']}" placeholder="排序"  lay-verify="number" style="width:100px;">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">其他项目</label>
+            <div class="layui-input-inline">
+              {if $data['other_start'] == 1}
+                <input type="checkbox" checked="" name="other_start" lay-skin="switch" lay-filter="switchTest" title="开关">
+              {else/}
+                <input type="checkbox" name="other_start" lay-skin="switch" lay-filter="switchTest" title="开关">
+              {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+
+        <!-- 山海经项目后续未定 -->
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">山海经项目</label>
+            <div class="layui-input-inline">
+              {if $data['stage_start'] == 1}
+                <input type="checkbox" checked="" name="stage_start" lay-skin="switch" lay-filter="switchTest" title="开关">
+              {else/}
+                <input type="checkbox" name="stage_start" lay-skin="switch" lay-filter="switchTest" title="开关">
+              {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div> -->
+
+        <div class="layui-form-item">
+            <label class="layui-form-label" style="width:100px;">是否开启留言</label>
+            <div class="layui-input-inline">
+              {if $data['leave_start'] == 1}
+                <input type="checkbox" checked="" name="leave_start" lay-skin="switch" lay-filter="switchLeaveStart" title="开关">
+              {else/}
+                <input type="checkbox" name="leave_start" lay-skin="switch" lay-filter="switchLeaveStart" title="开关">
+              {/if}
+                <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div>
+        {if $data['leave_start'] == 1}
+          <div id="switchleavel">
+            <div class="layui-form-item">
+              <label class="layui-form-label">留言表名 </label>
+              <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="leave_table" placeholder="项目用户表" value="{$LeaveConfig}" lay-verify="title">
+              </div>
+              <span style="color:#aaa;">* 这里添加项目留言表名</span>
+            </div>
+          </div>
+        {else/}
+          <div id="switchleavel" style="display:none;">
+            <div class="layui-form-item">
+              <label class="layui-form-label">留言表名 </label>
+              <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="leave_table" placeholder="项目用户表" value="" lay-verify="title">
+              </div>
+              <span style="color:#aaa;">* 这里添加项目留言表名</span>
+            </div>
+          </div>
+        {/if}
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="add-role" data-href="{:url('project_update')}">立即修改</button>
+                <a class="layui-btn layui-btn-small do-action" style="height:38px;line-height:38px;" data-type="doGoBack" data-href=""><i class="fa fa-mail-reply"></i>返回上一页</a>
+            </div>
+        </div>
+    </form>
+
+</div>
+{include file="public/footer"}
+
+<script>
+    layui.use(['layedit', 'laydate','common','upload'], function(){
+      var form = layui.form()
+      ,layer = layui.layer
+      ,common=layui.common
+      ,layedit = layui.layedit
+      ,laydate = layui.laydate;
+
+      //创建一个编辑器
+      var editIndex = layedit.build('LAY_demo_editor');
+
+      // //自定义验证规则
+      // form.verify({
+      //   title: function(value){
+      //     if(value.length < 3){
+      //       return '项目名称至少得3个字符啊';
+      //     }
+      //   }
+      //   ,pass: [/(.+){6,12}$/, '密码必须6到12位']
+      //   ,content: function(value){
+      //     layedit.sync(editIndex);
+      //   }
+      // });
+
+      //上传封面图片
+        layui.upload({
+            url: "{:url('Upload/uploadProjectImage')}" //上传接口
+            ,before: function(input){
+                //返回的参数item，即为当前的input DOM对象
+                console.log('图片上传中');
+            }
+            ,title:'上传封面图'
+            ,elem: '#upload_ad_image' //指定原始元素，默认直接查找class="layui-upload-file"
+            ,method: 'post' //上传接口的http类型
+            ,ext: 'jpg|png|gif'
+            ,type:'images'
+            ,success: function(data){ //上传成功后的回调
+                //console.log(res)
+                if(data.status == 1){
+                    $("input[name='img_start']").val("1");
+                    $("#images").val('/upload/testfile/' +data.image_name);
+                    $("#default_img").attr('src', '/upload/testfile/' + data.image_name).show();
+                }else{
+                    alert(data.error_info);
+                }
+
+            }
+        });
+
+      //获取复选款值
+      form.on('checkbox', function (data) {
+
+        //获取技术分类数据
+        var class_id = $("#BoxClass:checked").map(function(index,elem) {
+          return $(elem).val();
+        }).get().join(',');
+        $("input[name='classId']").val(class_id);
+
+        var val = data.value;
+        var label_id = '';
+        var str = [];
+        if($("#boxGet:checked").length>0){
+          var checked = $("#boxGet:checked");
+          for(var i =0;i<checked.length;i++){
+              label_id+=$(checked[i]).val()+',';
+              str[i]= $(checked[i]).val();
+          }
+        }
+
+        if(str.length > 4)
+        {
+            common.layerAlertE("标签最多选择4个", '提示');
+
+            $('input[value="'+val+'"]').next().removeClass("layui-form-checked");
+             $('input[value="'+val+'"]').attr('checked',false);
+             for(var i=0;i<str.length;i++){
+              if(str[i] == val){
+                str.splice(i, 1);
+              }
+
+             }
+        }
+        label_id = str.join(',');
+            // console.log(label_id);
+        $("input[name='labelId']").val(label_id);//复制隐藏域
+      });
+
+      //监听指定开关
+      form.on('switch(switchTest)', function(data){
+        layer.msg('开关checked：'+ (this.checked ? 'true' : 'false'), {
+          offset: '6px'
+        });
+        layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+      });
+
+      //监听用户经销商状态
+      form.on('switch(switchuserstart)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#UserCheckboxStart").show();
+        }
+        else
+        {
+            $("#UserCheckboxStart").css('display','none');
+        }
+      });
+
+      //监听项目来源地址配置文件
+      form.on('switch(switchsource)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#switchsource").show();
+        }
+        else
+        {
+            $("#switchsource").css('display','none');
+        }
+      });
+
+      //监听项目多类型以及多品牌配置
+      form.on('switch(switchmore)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#switchmore").show();
+        }
+        else
+        {
+            $("#switchmore").css('display','none');
+        }
+      });
+
+      //监听项目是否开启留言功能
+      form.on('switch(switchLeaveStart)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked == true)
+        {
+            $("#switchleavel").show();
+        }
+        else
+        {
+            $("#switchleavel").css('display','none');
+        }
+      });
+
+      //监听提交
+     form.on('submit(add-role)', function(data){
+            var sub=true;
+            var url=$(this).data('href');
+            if(url){
+                if(sub){
+                    $.ajax({
+                        url: url,
+                        type: 'post',
+                        dataType: 'json',
+                        data: data.field,
+                        success: function (data) {
+                            if (data.code == 1) {
+                                // location.href = rturl;
+                                common.layerAlertS(data.msg, '提示');
+                                window.location.href="{:url('project_list')}";
+                            }
+                            else {
+                                common.layerAlertE(data.msg, '提示');
+                            }
+                        },
+                        // beforeSend: function () {
+                        //     //    // 一般是禁用按钮等防止用户重复提交
+                        //     $(data.elem).attr("disabled", "true").text("提交中...");
+                        // },
+                        //complete: function () {
+                        //    $(sbbtn).removeAttr("disabled");
+                        //},
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            common.layerAlertE(textStatus, '提示');
+                        }
+                    });
+                }
+            }else{
+                common.layerAlertE('链接错误！', '提示');
+            }
+
+            return false;
+        });
+
+        /********************* 时间选择器控件 start *******************************/
+           var start = {
+                 max: '2099-06-16 23:59:59'
+                ,istoday: false
+                ,istime:true
+                ,format: 'YYYY-MM-DD'
+                ,choose: function(datas){
+                  end.min = datas; //开始日选好后，重置结束日的最小日期
+                  // end.start = datas //将结束日的初始值设定为开始日
+                }
+          };
+
+          var end = {
+             min: laydate.now()
+            ,max: '2099-06-16 23:59:59'
+            ,istoday: false
+            ,istime:true
+            ,format: 'YYYY-MM-DD'
+            ,choose: function(datas){
+              start.max = datas; //结束日选好后，重置开始日的最大日期
+            }
+          };
+
+          document.getElementById('LAY_demorange_s').onclick = function(){
+            start.elem = this;
+            laydate(start);
+          }
+          document.getElementById('LAY_demorange_e').onclick = function(){
+            end.elem = this
+            laydate(end);
+          }
+        /********************* 时间选择器控件 end *******************************/
+
+    });
+</script>

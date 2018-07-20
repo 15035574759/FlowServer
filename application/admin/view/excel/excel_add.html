@@ -1,0 +1,220 @@
+{include file="public/header"}
+<link rel="stylesheet" type="text/css" href="__css__/mask.css">
+<style>
+    .layui-upload-button{
+      margin:30px 0 0 50px;
+    }
+    .ExcelLocaton{
+      position: absolute; top: 42%; left: 25%; margin: -18px 0 0 -56px;
+      color: #FFFFFF;
+    }
+    a{color:#0088DB;text-decoration:none;cursor:pointer}
+    a:hover{color:#2A5E8E}
+    .theme-popover-mask{z-index:1;position:absolute;left:0;top:0;width:100%;height:100%;background:#000;opacity:0.5;filter:alpha(opacity=50);-moz-opacity:0.5;display:none;}
+    .theme-popover
+    {
+      z-index:0;
+      position:absolute;
+      top:80%;left:60%;
+      margin:-180px 0 0 -330px;
+      display:none;
+      width:380px;
+    }
+    .layui-form-label{width:120px;}
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>Excel多级导入</h2>
+    </blockquote>
+    <form class="layui-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label">经销商表名称</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="table_name" placeholder="经销商表名称" value="" lay-verify="table_name">
+            </div>
+            <span style="color:#aaa;line-height:40px;">* 添加对应经销商表名,去除表前缀 例：dealer_</span>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">Excel文件</label>
+            <div class="site-demo-upload upload-img" style="float: left;">
+                <img id="default_img" src="__img__/excel.jpg" width="300" height="100">
+                <div class="site-demo-upbar" style="float: right;">
+                        <span class="ExcelLocaton">前上传Excel文件</span>
+                        <input type="file" name="file" class="layui-upload-file" id="upload_ad_image">
+                        <p class="srcHtml" style="position: absolute;margin-left: -141px;margin-top: -30px;color: #FFF;font-size: 20px;"></p>
+                        <input type="hidden" id="images" name="images_url" value="">
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" checked="" name="start" lay-skin="switch" lay-filter="switchTest" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div> -->
+
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="add-role" data-href="{:url('excel/ExcelLead')}">开始导入</button>
+                <a class="layui-btn layui-btn-small do-action" style="line-height: 38px;height: 38px;" data-type="doGoBack" data-href=""><i class="fa fa-mail-reply"></i>返回上一页</a>
+            </div>
+        </div>
+    </form>
+
+ <div>
+   <!--  <div class="theme-buy">
+      <a class="btn btn-primary theme-login" href="javascript:;">点击查看效果</a>
+    </div> -->
+    <div class="theme-popover-mask"></div>
+    <div class="theme-popover">
+       <!--  <div class="theme-poptit">
+          <a href="javascript:;" title="关闭" class="close">×</a>
+        </div> -->
+        <!-- 预加载 -->
+        <div class="wrapper">
+          <div class="load-bar">
+            <div class="load-bar-inner" data-loading="0"> <span id="counter"></span> </div>
+          </div>
+          <p>导入中... </p>
+        </div>
+        <!-- 预加载 end-->
+    </div>
+  </div>
+
+{include file="public/footer"}
+<script>
+    layui.use(['layedit', 'laydate','common','upload'], function(){
+      var form = layui.form()
+      ,layer = layui.layer
+      ,common=layui.common
+      ,layedit = layui.layedit
+      ,laydate = layui.laydate;
+
+      //自定义验证规则
+      form.verify({
+          table_name: function(value){
+            if(value == ""){
+              return '名称不能为空';
+            } else if(value.substring(0,7) !== 'dealer_') {
+              return '必须以 dealer_ 开头';
+            }
+          }
+      });
+
+      //监听指定开关
+      form.on('switch(switchTest)', function(data){
+        layer.msg('开关checked：'+ (this.checked ? 'true' : 'false'), {
+          offset: '6px'
+        });
+        layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+      });
+
+      //上传Excel文件
+        layui.upload({
+                // url: "/admin/Upload/UploadExcel"
+            url: "{:url('uploadExcel')}" //上传接口
+            ,before: function(input){
+                //返回的参数item，即为当前的input DOM对象
+                console.log('文件上传中');
+            }
+            ,title:'上传Excel文件'
+            ,elem: '#upload_ad_image' //指定原始元素，默认直接查找class="layui-upload-file"
+            ,method: 'post' //上传接口的http类型
+            ,ext: 'xlsx|xls'
+            ,type:'images'
+            ,success: function(data){ //上传成功后的回调
+                  // var img_name = ;
+                  // console.log(img_name);
+                // console.log(data)
+                if(data.status == 1) {
+                    $(".srcHtml").html(data.image_name);
+                    $(":input[name='images_url']").val('/UploadFiles/testexcel/' + data.image_name);
+                    common.layerAlertS('文件上传成功', '提示');
+                } else {
+                    alert(data.error_info);
+                }
+
+            }
+        });
+
+      //监听提交
+      form.on('submit(add-role)', function(data){
+            var sub=true;
+            var url=$(this).data('href');
+            if(url){
+                if(sub){
+                  var loading = new loadingBox();
+                	loading.showLoad('加载中...'); //显示弹框
+                    $.ajax({
+                        url: url,
+                        type: 'post',
+                        dataType: 'json',
+                        data: data.field,
+                        success: function (data) {
+                            if (data.code == 1) {
+                                loading.hideLoad(); //隐藏弹框
+                                common.layerAlertS(data.msg, '提示');
+                                window.location.href="{:url('excel_lead')}";
+                            } else {
+                                loading.hideLoad(); //隐藏弹框
+                                common.layerAlertE(data.msg, '提示');
+                            }
+                        },
+                        // beforeSend: function () {
+                        //     // loading.hideLoad(); //隐藏弹框
+                        //     // 一般是禁用按钮等防止用户重复提交
+                        //     $(data.elem).attr("disabled", "true").text("提交中...");
+                        // },
+                        //complete: function () {
+                        //    $(sbbtn).removeAttr("disabled");
+                        //},
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            loading.hideLoad(); //隐藏弹框
+                            common.layerAlertE(textStatus, '提示');
+                        }
+                    });
+                }
+            }else{
+                common.layerAlertE('链接错误！', '提示');
+            }
+
+            return false;
+        });
+
+       var start = {
+            min: laydate.now()
+            ,max: '2099-06-16 23:59:59'
+            ,istoday: false
+            ,choose: function(datas){
+              end.min = datas; //开始日选好后，重置结束日的最小日期
+              end.start = datas //将结束日的初始值设定为开始日
+            }
+      };
+
+
+      // //显示遮罩层
+      // $('.theme-popover-mask').show();
+      // $('.theme-popover-mask').height($(document).height());
+      // $('.theme-popover').slideDown(200);
+      // //定时器
+      // var interval = setInterval(increment,100);
+      // var current = 0;
+      // var left = -25;//滑块坐标
+      // var long = 323 + 25;//滑块滑动的总距离
+      // function increment(){
+      //   current++;
+      //   $('#counter').html(current+'%'); //百分比
+      //   $('.load-bar-inner').css('width',current+'%');//进度条变长
+      //   $('#counter').css('left',(-25+long*current/100)+'px');//滑块滑动
+      //   console.log(left+long*current/100);
+      //     if(current == 100) { //加到100时，清除定时器
+      //       clearInterval(interval);
+      //     }
+      //   }
+      //   //关闭遮罩层
+      //   $('.theme-popover-mask').hide();
+      //   $('.theme-popover').slideUp(200);
+});
+</script>

@@ -1,0 +1,156 @@
+{include file="public/header"/}
+<style>
+    .layui-form-switch {
+        padding-left: 0px;
+        transition: .1s linear;
+    }
+    .layui-table tr th{text-align: center;}
+    .layui-table tr td{text-align: center;}
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>留言列表</h2>
+    </blockquote>
+    <div class="y-role">
+        <!--工具栏-->
+        <div id="floatHead" class="toolbar-wrap">
+            <div class="toolbar">
+                <div class="box-wrap">
+                    <a class="menu-btn"></a>
+                    <div class="l-list">
+                        <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href=""><i class="fa fa-refresh fa-spin"></i>刷新</a>
+                        <a class="layui-btn layui-btn-small do-action" target="_blank" href="{:url('Excel/LeaveDataExcel',['project_id'=>$project_id])}">导出全部数据</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/工具栏-->
+        <!--文字列表-->
+        <div class="fhui-admin-table-container">
+            <form action="/_Admin/Nav_list" class="form-horizontal" id="formrec" method="post" role="form">
+                <table class="layui-table" lay-skin="line">
+                <!-- <colgroup>
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="8%">
+                    <col width="10%">
+                    <col width="6%">
+                    <col width="12%">
+                    <col width="10%">
+                    <col width="20%">
+                </colgroup> -->
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>留言内容</th>
+                    <th>留言时间</th>
+                    <th>留言期限</th>
+                    <th>是否有效</th>
+                    <th style="text-align:center">操作</th>
+                </tr>
+                </thead>
+                <script id="arlist" type="text/html">
+                    {{# for(var i=0;i<d.length;i++){  }}
+                    <tr class="long-td">
+                        <td>{{d[i].id}}</td>
+                        <td>{{d[i].content}}</td>
+                        <td>{{d[i].time}}</td>
+                        <td>第 {{d[i].expect_start}} 期</td>
+                        <td align="center">
+                            {{# if(d[i].start == 1){ }}
+                                <a href="javascript:;" class="leave_status"  data-id="{{d[i].id}}">
+                                    <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+                                </a>
+                                {{# }else{ }}
+                                <a href="javascript:;" class="leave_status" data-id="{{d[i].id}}">
+                                    <div class="layui-unselect layui-form-switch"><i></i></div>
+                                </a>
+                            {{# } }}
+                        </td>
+                        <td>
+                            <!-- <a  class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('edit_user')}" data-id="{{d[i].id}}">
+                                <i class="icon-edit  fa fa-pencil-square-o"></i>编辑
+                            </a> -->
+                            <a class="layui-btn layui-btn-small do-action" data-type="doDelOne" data-href="{:url('leave_delete',['table'=>$leave_table])}" data-id="{{d[i].id}}">
+                                <i class="icon-edit  fa fa-pencil-square-o"></i>删除
+                            </a>
+                        </td>
+                    </tr>
+                    {{# } }}
+                </script>
+                <tbody id="article_list"></tbody>
+            </table>
+            </form>
+        </div>
+        <div id="AjaxPage" style="margin-top: -57px;float: right;"></div>
+        <div style="float: right;margin-top: -9px;margin-right: 13px;">
+            共{$count}条数据，<span id="allpage"></span>
+        </div>
+    </div>
+</div>
+
+{include file="public/footer"}
+<script>
+    /**
+     * [user_state 文章状态]
+     * @param  {[type]} val [description]
+     * @Author[jonny 980218641@qq.com]
+     */
+     var project_id = "{$project_id}";
+     var laytpl,laypage;
+     var url='{:url("leave/leave_user_list")}?project_id='+project_id;
+     var allpages='{$allpage}';
+    layui.use(['layer', 'laypage','common', 'icheck','laytpl'], function () {
+        var $ = layui.jquery
+                , layer = layui.layer
+                , common = layui.common;
+        laytpl =layui.laytpl;
+        laypage = layui.laypage;
+
+        common.Ajaxpage();
+
+        //加载单选框样式
+        $(("[type='checkbox']")).iCheck({
+            checkboxClass: 'icheckbox_square-green',
+
+        });
+
+        //点击改变留言状态
+         $(document).on('click','.leave_status', function () {
+            var id=$(this).attr('data-id');
+            var obs=$(this);
+            var leave_table = "{$leave_table}"; //当前留言表
+            $.ajax({
+                url: '{:url("LeaveStart")}',
+                dataType: "json",
+                data:{'id':id,'table':leave_table},
+                type: "POST",
+                success: function(data){
+                    if(data.code == 1){
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj)
+                {
+                    if(ajaxobj.responseText!='')
+                        alert(ajaxobj.responseText);
+                }
+            });
+        });
+
+        //全选
+        $(document).on('ifChanged','.selected-all', function (event) {
+            // alert(1);
+            var $input = $('.layui-table tbody tr td').find('input');
+            $input.iCheck(event.currentTarget.checked ? 'check' : 'uncheck');
+        });
+
+    });
+</script>

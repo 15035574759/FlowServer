@@ -1,0 +1,202 @@
+{include file="public/header"}
+<style>
+    .site-demo-upload,
+    .site-demo-upload img{width: 438px; height: 270px;}
+    .site-demo-upload{position: relative; background: #e2e2e2;}
+    .site-demo-upload .site-demo-upbar{position: absolute; top: 50%; left: 50%; margin: -18px 0 0 -56px;}
+    .site-demo-upload .layui-upload-button{background-color: rgba(0,0,0,.2); color: rgba(255,255,255,1);}
+    .upload-img{
+        margin-left: 130px;
+        margin-top: 10px;
+    }
+    .layui-form-label {
+      width:100px;
+    }
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>添加 品牌 活动</h2>
+    </blockquote>
+    <form class="layui-form">
+    <input type="hidden" name="actionTable" value="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">活动名称</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="nameuse" placeholder="活动名称" lay-verify="nameuse">
+            </div>
+        </div>
+        <div class="layui-form-item">
+           <label class="layui-form-label">选择城市</label>
+           <div class="layui-input-block" style="float:left;margin-left:0px;">
+             <select name="cityId" lay-verify="cityId">
+               <option value="0">==请选择==</option>
+               {foreach name="CityList" item="v"}
+                 <option value="{$v.id}">{$v.name}</option>
+               {/foreach}
+             </select>
+           </div>
+         </div>
+        <div class="layui-form-item layui-form-text">
+          <input type="hidden" name="img_start" value="0" lay-verify="image">
+            <label class="layui-form-label">封面图</label>
+            <div class="site-demo-upload upload-img">
+                <img id="default_img" src="__img__/tong.jpg">
+                <div class="site-demo-upbar">
+                    <input type="file" name="file" class="layui-upload-file" id="upload_ad_image">
+                    <input type="hidden" id="images" name="image" value="http://www.flows.com/Flow/public/statisc/img/tong.jpg">
+                </div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">会员页面链接</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="vip_url" placeholder="会员页面链接" lay-verify="vip_url">
+            </div>
+            <span style="color:#aaa;">注: 以http://或者https://开头命名</span>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">活动描述</label>
+            <div class="layui-input-inline">
+                <textarea placeholder="请输入内容" style="width:600px;" name="describe" class="layui-textarea" lay-verify="describe"></textarea>
+            </div>
+        </div>
+        <!-- <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-inline">
+                <input type="checkbox" checked="" name="state" lay-skin="switch" lay-verify="switchTest" title="开关"><div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+            </div>
+        </div> -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" type="text" name="sort" placeholder="排序" value="{$WorcarId}" lay-verify="number" style="width:100px;">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="add-role" data-href="{:url('worcar_add')}">立即提交</button>
+                <a class="layui-btn layui-btn-small do-action" data-type="doGoBack" style="height:38px;line-height:38px;" data-href=""><i class="fa fa-mail-reply"></i>返回上一页</a>
+            </div>
+        </div>
+    </form>
+</div>
+{include file="public/footer"}
+
+<script>
+    layui.use(['laydate','common','upload','form','layer'], function(){
+      var form = layui.form()
+      ,layer = layui.layer
+      ,common=layui.common
+
+      //自定义验证规则
+      form.verify({
+        nameuse: function(value){
+          if(value.length > 20){
+            return '活动名称应该保证在20个字以内';
+          }
+        }
+        ,cityId: function(value) {
+          if(value == 0) return '请选择城市';
+        }
+        ,image: function(value) {
+          if(value == 0) return '请先上传图片';
+        }
+        ,describe: function(value) {
+            if(value == '') {
+                return '活动描述不能为空';
+            } if(value.length > 200) {
+                return '活动描述应在200字以内';
+            }
+        }
+      });
+
+      // 设置活动描述字数限制
+      $(".layui-textarea").keyup(function(name){
+        if($(this).val().length > 210) {
+          $(".layui-textarea").attr({maxlength:"210"})
+          common.layerAlertE("输入内容应小于200字以内", '提示');
+          return false;
+        }
+      })
+      // 设置活动名称字数限制
+      $("input[name='nameuse']").keyup(function(name){
+        if($(this).val().length > 20) {
+          $("input[name='nameuse']").attr({maxlength:"20"})
+          common.layerAlertE("输入内容应小于20字以内", '提示');
+          return false;
+        }
+      })
+
+      //上传封面图片
+        layui.upload({
+             url: "{:url('Worcar/uploadWorcarImage')}" //上传接口
+            ,before: function(input){
+                //返回的参数item，即为当前的input DOM对象
+                console.log('图片上传中');
+            }
+            ,title:'上传封面图'
+            ,elem: '#upload_ad_image' //指定原始元素，默认直接查找class="layui-upload-file"
+            ,method: 'post' //上传接口的http类型
+            ,ext: 'jpg|png|gif'
+            ,type:'images'
+            ,success: function(data){ //上传成功后的回调
+                //console.log(res)
+                if(data.status == 1){
+                    $("input[name='img_start']").val("1");
+                    $("#images").val('/upload/testfile/' +data.image_name);
+                    $("#default_img").attr('src', '/upload/testfile/' + data.image_name).show();
+                }else{
+                    alert(data.error_info);
+                }
+
+            }
+        });
+
+      //监听指定开关
+      form.on('switch(switchTest)', function(data){
+        layer.msg('开关checked：'+ (this.checked ? 'true' : 'false'), {
+          offset: '6px'
+        });
+        layer.tips('温馨提示：请注意开关状态的文字可以随意定义，而不仅仅是ON|OFF', data.othis)
+      });
+
+     //监听提交
+        form.on('submit(add-role)', function(data){
+            var sub=true;
+            var url=$(this).data('href');
+            if(url){
+                if(sub){
+                    $.ajax({
+                        url: url,
+                        type: 'post',
+                        dataType: 'json',
+                        data: data.field,
+                        success: function (data) {
+                            if (data.code == 1) {
+                                common.layerAlertS(data.msg, '提示');
+                                window.location.href="{:url('worcar_list')}";
+                            } else {
+                                common.layerAlertE(data.msg, '提示');
+                            }
+                        },
+                        beforeSend: function () {
+                            //    // 一般是禁用按钮等防止用户重复提交
+                            $(data.elem).attr("disabled", "true").text("提交中...");
+                        },
+                        //complete: function () {
+                        //    $(sbbtn).removeAttr("disabled");
+                        //},
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            common.layerAlertE(textStatus, '提示');
+                        }
+                    });
+                }
+            }else{
+                common.layerAlertE('链接错误！', '提示');
+            }
+
+            return false;
+        });
+
+});
+</script>

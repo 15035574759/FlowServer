@@ -1,0 +1,153 @@
+{include file="public/header"/}
+<style>
+    .layui-form-switch {
+        padding-left: 0px;
+        transition: .1s linear;
+    }
+    .layui-table tr th{text-align: center;}
+    .layui-table tr td{text-align: center;}
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>品牌活动列表</h2>
+    </blockquote>
+    <div class="y-role">
+        <!--工具栏-->
+        <div id="floatHead" class="toolbar-wrap">
+            <div class="toolbar">
+                <div class="box-wrap">
+                    <a class="menu-btn"></a>
+                    <div class="l-list">
+                        <a class="layui-btn layui-btn-small do-action" data-type="doAdd" data-href="{:url('worcar_add')}"><i class="fa fa-plus"></i>添加活动</a>
+                        <a class="layui-btn layui-btn-small do-action" data-type="doAdd" data-href="{:url('worcar_class')}">城市列表</a>
+                        <!-- <a class="layui-btn layui-btn-small do-action" data-type="doDelete" data-href="{:url('del_log')}"><i class="fa fa-trash-o"></i>删除</a> -->
+                        <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href=""><i class="fa fa-refresh fa-spin"></i>刷新</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/工具栏-->
+        <!--文字列表-->
+        <div class="fhui-admin-table-container">
+            <!-- <form action="/_Admin/Nav_list" class="form-horizontal" id="formrec" method="post" role="form"> -->
+                <table class="layui-table" lay-skin="line">
+                <!-- <colgroup>
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="8%">
+                    <col width="10%">
+                    <col width="6%">
+                    <col width="12%">
+                    <col width="10%">
+                    <col width="20%">
+                </colgroup> -->
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>活动名称</th>
+                    <th>封面图片</th>
+                    <th>活动描述</th>
+                    <th>添加时间</th>
+                    <th>所属城市</th>
+                    <th>排序</th>
+                    <th>查看留资信息</th>
+                    <th style="text-align:center">是否启用</th>
+                    <th style="text-align:center">操作</th>
+                </tr>
+                </thead>
+                  <script id="arlist" type="text/html">
+                     {{# for(var i=0;i<d.length;i++){ }}
+                         <tr>
+                             <td>{{d[i].id}}</td>
+                             <td>{{d[i].name}}</td>
+                             <td><img src="{{d[i].cover_img}}" alt="" width="100" height="80" onerror="this.src='__img__/no_img.png'"></td>
+                             <td>{{d[i].describe}}</td>
+                             <td>{{d[i].addtime}}</td>
+                             <td>{{d[i].city_name}}</td>
+                             <td>{{d[i].sort}}</td>
+                             <td>
+                               {{# if(d[i].user_start == 1){ }}
+                                 <a class="layui-btn do-action" data-type="doEdit" data-href="{:url('ShowWorcarUserList')}" data-id="{{d[i].id}}">查看</a>
+                               {{# }else{ }}
+                                 <a class="layui-btn do-action layui-btn-disabled" data-id="{{d[i].id}}">查看</a>
+                                 <!-- <a class="layui-btn do-action" data-type="doEdit" data-href="{:url('ShowWorcarUserList')}" data-id="{{d[i].id}}">查看</a> -->
+                               {{# } }}
+                             </td>
+                             <td align="center">
+                                 {{# if(d[i].state == 1){ }}
+                                     <a href="javascript:;" class="change_status"  data-id="{{d[i].id}}">
+                                         <div class="layui-unselect layui-form-switch layui-form-onswitch"><i></i></div>
+                                     </a>
+                                     {{# }else{ }}
+                                     <a href="javascript:;" class="change_status" data-id="{{d[i].id}}">
+                                         <div class="layui-unselect layui-form-switch"><i></i></div>
+                                     </a>
+                                 {{# } }}
+                             </td>
+                             <td align="center">
+                                 <a class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('WorcarUpdate')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>编辑</a>
+                                 <a class="layui-btn layui-btn-small do-action" data-type="doDelOne" data-href="{:url('WorcarDelete')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>删除</a>
+                             </td>
+                         </tr>
+                     {{# } }}
+                  </script>
+                <tbody id="article_list"></tbody>
+            </table>
+            <!-- </form> -->
+        </div>
+        <div id="AjaxPage" style="margin-top: -57px;float: right;"></div>
+        <div style="float: right;margin-top: -9px;margin-right: 13px;">
+            共{$count}条数据，<span id="allpage"></span>
+        </div>
+    </div>
+</div>
+
+{include file="public/footer"}
+<script>
+    /**
+     * [user_state 文章状态]
+     * @param  {[type]} val [description]
+     * @Author[jonny 980218641@qq.com]
+     */
+
+    var laytpl,laypage;
+    var url='{:url("worcar_list")}';
+    layui.use(['layer', 'laypage','common', 'icheck','laytpl'], function () {
+        var $ = layui.jquery
+                , layer = layui.layer
+                , common = layui.common;
+        laytpl =layui.laytpl;
+        laypage = layui.laypage;
+
+        common.Ajaxpage();
+
+        //点击改变状态
+         $(document).on('click','.change_status', function () {
+            var id=$(this).attr('data-id');
+            var obs=$(this);
+            $.ajax({
+                url: '{:url("WorcarStart")}',
+                dataType: "json",
+                data:{'id':id},
+                type: "POST",
+                success: function(data){
+                    if(data.code == 1){
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj) {
+                    if(ajaxobj.responseText!='')
+                        alert(ajaxobj.responseText);
+                }
+            });
+        });
+
+});
+</script>

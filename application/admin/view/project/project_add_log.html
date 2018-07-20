@@ -1,0 +1,185 @@
+{include file="public/header"}
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>添加项目修改日志</h2>
+    </blockquote>
+    <form class="layui-form" action="add_article">
+        <div class="layui-form-item">
+            <div class="layui-input-inline">
+                <input class="layui-input" type="hidden" name="p_id" value="{$p_id}"  lay-verify="title">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">修改端</label>
+            <div class="layui-input-inline">
+                <select name="source_end" lay-verify="name">
+                    <option value="">请选择</option>
+                    <option value="1">PC端</option>
+                    <option value="2">移动端</option>
+                    <option value="3">双端修改</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">上线状态</label>
+            <div class="layui-input-inline">
+                <select name="state" lay-verify="name">
+                    <option value="">请选择</option>
+                    <option value="0">已上线</option>
+                    <option value="1">未上线</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+          <label class="layui-form-label">修改人</label>
+          <input type="hidden" name="name" value="" lay-verify="label_id">
+          <div class="layui-input-block">
+              <input type="checkbox" id="BoxClassName" value="陈斌" title="陈斌">
+              <input type="checkbox" id="BoxClassName" value="王瑞霞" title="王瑞霞">
+              <input type="checkbox" id="BoxClassName" value="于泽" title="于泽">
+              <input type="checkbox" id="BoxClassName" value="秦林慧" title="秦林慧">
+          </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">修改时间</label>
+            <div class="layui-input-inline">
+                <input class="layui-input" placeholder="请选择时间" name="time" onclick="layui.laydate({elem: this, istime: true, format: 'YYYY-MM-DD hh:mm:ss'})" lay-verify="time">
+            </div>
+        </div>
+
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">修改内容</label>
+            <div class="layui-input-block">
+                <textarea placeholder="修改内容" name="content" class="layui-textarea" lay-verify="content"></textarea>
+                <span style="color:#aaa;">* 这里添加项目修改内容 例如：1.修改头图 回车确进行下一个</span>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit="" lay-filter="add-role" data-href="{:url('addProjectLog')}">立即提交</button>
+                <a class="layui-btn layui-btn-small do-action" data-type="doGoBack" data-href=""><i class="fa fa-mail-reply"></i>返回上一页</a>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+
+{include file="public/footer"}
+<script>
+    layui.use(['form','common'], function(){
+        var $ = layui.jquery
+                ,common=layui.common
+                ,form = layui.form();
+        //自定义验证规则
+        form.verify({
+            title:function(value){
+                if(value == ""){
+                    return '项目id不能为空';
+                }
+            }
+            ,name:function(value){
+                if(value == ""){
+                    return '修改人不能为空';
+                }
+            }
+            ,time:function(value){
+                if(value == ""){
+                    return '修改时间不能为空';
+                }
+            }
+            ,content:function(value){
+                if(value == ""){
+                    return '修改内容不能为空';
+                }
+            }
+        });
+
+        //获取复选款值
+        form.on('checkbox', function (data) {
+          //获取技术分类数据
+          var className = $("#BoxClassName:checked").map(function(index,elem) {
+            return $(elem).val();
+          }).get().join(',');
+          // console.log(class_id);
+          $("input[name='name']").val(className);
+        });
+
+        //监听提交
+        form.on('submit(add-role)', function(data){
+            var sub=true;
+            var url=$(this).data('href');
+            if(url){
+                if(sub){
+                    $.ajax({
+                        url: url,
+                        type: 'post',
+                        dataType: 'json',
+                        data: data.field,
+                        success: function (data) {
+                            if (data.code == 1) {
+                                // location.href = rturl;
+                                common.layerAlertS(data.msg, '提示');
+                                window.location.href="{:url('project/updateProjectLog')}?project_id="+data.pId;
+                            } else {
+                                common.layerAlertE(data.msg, '提示');
+                            }
+                        },
+                        beforeSend: function () {
+                            //    // 一般是禁用按钮等防止用户重复提交
+                            $(data.elem).attr("disabled", "true").text("提交中...");
+                        },
+                        //complete: function () {
+                        //    $(sbbtn).removeAttr("disabled");
+                        //},
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            common.layerAlertE(textStatus, '提示');
+                        }
+                    });
+                }
+            }else{
+                common.layerAlertE('链接错误！', '提示');
+            }
+
+            return false;
+        });
+    });
+</script>
+<script>
+layui.use('laydate', function(){
+  var laydate = layui.laydate;
+
+  var start = {
+    min: laydate.now()
+    ,max: '2099-06-16 23:59:59'
+    ,istoday: false
+    ,choose: function(datas){
+      end.min = datas; //开始日选好后，重置结束日的最小日期
+      end.start = datas //将结束日的初始值设定为开始日
+    }
+  };
+
+  var end = {
+    min: laydate.now()
+    ,max: '2099-06-16 23:59:59'
+    ,istoday: false
+    ,choose: function(datas){
+      start.max = datas; //结束日选好后，重置开始日的最大日期
+    }
+  };
+
+  document.getElementById('LAY_demorange_s').onclick = function(){
+    start.elem = this;
+    laydate(start);
+  }
+  document.getElementById('LAY_demorange_e').onclick = function(){
+    end.elem = this
+    laydate(end);
+  }
+});
+</script>

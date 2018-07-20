@@ -1,0 +1,180 @@
+{include file="public/header"/}
+<style>
+    .layui-form-switch {
+        padding-left: 0px;
+        transition: .1s linear;
+    }
+    .layui-table tr th{text-align: center;}
+    .layui-table tr td{text-align: center;}
+</style>
+<div class="main-wrap">
+    <blockquote class="layui-elem-quote fhui-admin-main_hd">
+        <h2>项目列表</h2>
+    </blockquote>
+    <div class="y-role">
+        <!--工具栏-->
+        <div id="floatHead" class="toolbar-wrap">
+            <div class="toolbar">
+                <div class="box-wrap">
+                    <a class="menu-btn"></a>
+                    <div class="l-list">
+                        <a class="layui-btn layui-btn-small do-action" data-type="doAdd" data-href="{:url('project_add')}"><i class="fa fa-plus"></i>新增</a>
+                        <a class="layui-btn layui-btn-small do-action" data-type="doDelete" data-href="{:url('del_log')}"><i class="fa fa-trash-o"></i>删除</a>
+                        <a class="layui-btn layui-btn-small do-action" data-type="doRefresh" data-href=""><i class="fa fa-refresh fa-spin"></i>刷新</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/工具栏-->
+        <!--文字列表-->
+        <div class="fhui-admin-table-container">
+            <!-- <form action="/_Admin/Nav_list" class="form-horizontal" id="formrec" method="post" role="form"> -->
+                <table class="layui-table" lay-skin="line">
+                <!-- <colgroup>
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="5%">
+                    <col width="15%">
+                    <col width="8%">
+                    <col width="10%">
+                    <col width="6%">
+                    <col width="12%">
+                    <col width="10%">
+                    <col width="20%">
+                </colgroup> -->
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>订单号</th>
+                    <th>姓名</th>
+                    <th>手机号</th>
+                    <th>城市</th>
+                    <th>经销商</th>
+                    <th>活动名称</th>
+                    <th>车型</th>
+                    <th>下单时间</th>
+                    <th>订单状态</th>
+                    <th>短信状态</th>
+                    <th>核销状态</th>
+                    <th style="text-align:center">操作</th>
+                </tr>
+                </thead>
+                <tbody id="article_list">
+                  <tr>
+                      <td>1</td>
+                      <td>Yl_123456789</td>
+                      <td>张三</td>
+                      <td>150322524185</td>
+                      <td>北京</td>
+                      <td>苏宁易购经销商</td>
+                      <td>苏宁活动</td>
+                      <td>车型</td>
+                      <td>20171121 13:53:00</td>
+                      <td>
+                        未发货
+                        <img src="/javascript/img/deliver.png" alt="已发货" width="40">
+                      </td>
+                      <td>
+                        未发送
+                        <img src="/javascript/img/send.png" alt="已发送" width="25">
+                      </td>
+                      <td>
+                        未核销
+                        <img src="/javascript/img/write.png" alt="已核销" width="25">
+                      </td>
+                      <td align="center">
+                          <button class="layui-btn layui-btn-radius GetSend">发送优惠券</button>
+                          <!-- <button class="layui-btn layui-btn-disabled layui-btn-radius">禁用按钮</button> -->
+                          <!-- <a class="layui-btn layui-btn-small do-action" data-type="doEdit" data-href="{:url('project_update')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>编辑</a>
+                          <a class="layui-btn layui-btn-small do-action" data-type="doDelOne" data-href="{:url('project_delete')}" data-id="{{d[i].id}}"><i class="icon-edit  fa fa-pencil-square-o"></i>删除</a> -->
+                      </td>
+                  </tr>
+                </tbody>
+                <input type="hidden" id="input">
+                <input type="text" id="CopyUrl" value="" style="color:#FFFFFF;width:50px;position: absolute;margin-top:-25px;opacity:0;">   <!-- 复制地址 -->
+            </table>
+            <!-- </form> -->
+        </div>
+        <div id="AjaxPage" style="margin-top: -57px;float: right;"></div>
+        <div style="float: right;margin-top: -9px;margin-right: 13px;">
+            共100条数据，<span id="allpage"></span>
+        </div>
+    </div>
+</div>
+
+{include file="public/footer"}
+<script>
+    var laytpl,laypage;
+    var url='';
+    var allpages='';
+    layui.use(['layer', 'laypage','common', 'icheck','laytpl'], function () {
+        var $ = layui.jquery
+                , layer = layui.layer
+                , common = layui.common;
+        laytpl =layui.laytpl;
+        laypage = layui.laypage;
+
+        common.Ajaxpage();
+
+
+        //点击发送优惠券
+        $(document).on("click",".GetSend",function(){
+            var order_id = $(this).attr('data-id');
+            var loading = new loadingBox();
+          	loading.showLoad('加载中...'); //显示弹框
+          	// loading.hideLoad(); //隐藏弹框
+            $.ajax({
+                url: '{:url("Coupon/SendCoupon")}',
+                dataType: "json",
+                data:{'order_id':order_id},
+                type: "POST",
+                success: function(data){
+                  // console.log(data);
+                    if(data.code == 1001){
+                        loading.hideLoad(); //隐藏弹框
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj) {
+                    if(ajaxobj.responseText!='')
+                    alert(ajaxobj.responseText);
+                }
+            });
+            // $(this).addClass('layui-btn-disabled');//禁用发送按钮
+        });
+
+
+        //点击改变状态
+         $(document).on('click','.change_status', function () {
+            var id=$(this).attr('data-id');
+            var obs=$(this);
+            $.ajax({
+                url: '{:url("ProjectStart")}',
+                dataType: "json",
+                data:{'id':id},
+                type: "POST",
+                success: function(data){
+
+
+                    if(data.code == 1){
+                        obs.find('div').removeClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:2,time:1500,shade: 0.1,});
+                    }else{
+                        obs.find('div').addClass('layui-form-onswitch');
+                        layer.msg(data.msg,{icon:1,time:1500,shade: 0.1,});
+                    }
+                },
+                error:function(ajaxobj)
+                {
+                    if(ajaxobj.responseText!='')
+                        alert(ajaxobj.responseText);
+                }
+            });
+        });
+    });
+</script>
